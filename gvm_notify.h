@@ -2,20 +2,24 @@
 #define GVM_NOTIFY_H
 
 #include <pthread.h>
-#include <cstdint>
+#include <stdint.h>
 
 #include <cuda.h>
 
-enum gvm_notice_type_t
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum
 {
 	GVM_NOTICE_EVICTION     = 0,
 	GVM_NOTICE_AVAILABILITY = 1,
-};
+} gvm_notice_type_t;
 
 #define UVM_WAIT_NOTICE 82
 #define NV_OK 0x00000000
 
-struct UVM_WAIT_NOTICE_PARAMS
+typedef struct
 {
 	CUuuid            uuid;
 	gvm_notice_type_t type;
@@ -29,11 +33,15 @@ struct UVM_WAIT_NOTICE_PARAMS
 		} availability;
 	};
 	int rmStatus;
-};
+} UVM_WAIT_NOTICE_PARAMS;
 
 typedef void (*gvm_notice_fn)(const UVM_WAIT_NOTICE_PARAMS *params);
 
 int  gvm_register_notify(gvm_notice_fn handler);
-void gvm_unregister_notify();
+void gvm_unregister_notify(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
