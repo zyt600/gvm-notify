@@ -48,6 +48,6 @@ struct NVOS64_PARAMETERS {
 };
 
 extern int g_uvmfd;
-int  init_uvmfd_with_gpu(const CUuuid *gpu_uuid);
+int  init_uvmfd(void);
 
 #endif

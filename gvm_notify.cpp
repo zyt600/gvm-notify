@@ -27,26 +27,8 @@ static void *notify_thread_fn(void *) {
 }
 
 int gvm_register_notify(gvm_notice_fn handler) {
-	CUdevice device;
-	CUuuid uuid;
-
-	if (cuInit(0) != CUDA_SUCCESS) {
-		fprintf(stderr, "gvm_register_notify: cuInit failed\n");
-		return -1;
-	}
-
-	if (cuDeviceGet(&device, 0) != CUDA_SUCCESS) {
-		fprintf(stderr, "gvm_register_notify: cuDeviceGet failed\n");
-		return -1;
-	}
-
-	if (cuDeviceGetUuid(&uuid, device) != CUDA_SUCCESS) {
-		fprintf(stderr, "gvm_register_notify: cuDeviceGetUuid failed\n");
-		return -1;
-	}
-
-	if (init_uvmfd_with_gpu(&uuid) != 0) {
-		fprintf(stderr, "gvm_register_notify: init_uvmfd_with_gpu failed\n");
+	if (init_uvmfd() != 0) {
+		fprintf(stderr, "gvm_register_notify: init_uvmfd failed\n");
 		return -1;
 	}
 

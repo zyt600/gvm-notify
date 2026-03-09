@@ -27,10 +27,33 @@ static int rm_alloc_client(int ctlfd, uint32_t *hClient)
 	return 0;
 }
 
-int init_uvmfd_with_gpu(const CUuuid *gpu_uuid)
+static int get_gpu_uuid(CUuuid *uuid)
+{
+	CUdevice device;
+
+	if (cuInit(0) != CUDA_SUCCESS) {
+		fprintf(stderr, "get_gpu_uuid: cuInit failed\n");
+		return -1;
+	}
+	if (cuDeviceGet(&device, 0) != CUDA_SUCCESS) {
+		fprintf(stderr, "get_gpu_uuid: cuDeviceGet failed\n");
+		return -1;
+	}
+	if (cuDeviceGetUuid(uuid, device) != CUDA_SUCCESS) {
+		fprintf(stderr, "get_gpu_uuid: cuDeviceGetUuid failed\n");
+		return -1;
+	}
+	return 0;
+}
+
+int init_uvmfd(void)
 {
 	if (g_uvmfd >= 0)
 		return 0;
+
+	CUuuid gpu_uuid;
+	if (get_gpu_uuid(&gpu_uuid) != 0)
+		return -1;
 
 	int uvmfd = open("/dev/nvidia-uvm", O_RDWR);
 	if (uvmfd < 0) {
@@ -61,7 +84,7 @@ int init_uvmfd_with_gpu(const CUuuid *gpu_uuid)
 	}
 
 	UVM_REGISTER_GPU_PARAMS reg_params = {};
-	memcpy(&reg_params.gpu_uuid, gpu_uuid, sizeof(CUuuid));
+	memcpy(&reg_params.gpu_uuid, &gpu_uuid, sizeof(CUuuid));
 	reg_params.rmCtrlFd = ctlfd;
 	reg_params.hClient = hClient;
 	reg_params.hSmcPartRef = 0;
