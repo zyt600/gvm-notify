@@ -14,6 +14,24 @@ TARGET = $(BUILD)/libgvmnotify.so
 
 all: $(TARGET)
 
+install-cxx: $(TARGET)
+	install -d $(DESTDIR)$(INCLUDEDIR)
+	install -d $(DESTDIR)$(LIBDIR)
+	install -m 644 gvm_notify.h  $(DESTDIR)$(INCLUDEDIR)/
+	install -m 755 $(TARGET)     $(DESTDIR)$(LIBDIR)/
+	ldconfig 2>/dev/null || true
+
+install-python:
+	pip install ./python
+
+uninstall-cxx:
+	rm -f  $(DESTDIR)$(INCLUDEDIR)/gvm_notify.h
+	rm -f  $(DESTDIR)$(LIBDIR)/libgvmnotify.so
+	ldconfig 2>/dev/null || true
+
+uninstall-python:
+	pip uninstall -y gvm-notify
+
 $(TARGET): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 
@@ -25,17 +43,6 @@ $(BUILD):
 
 clean:
 	rm -rf $(BUILD)
+	rm -rf python/build python/*.egg-info
 
-install: $(TARGET)
-	install -d $(DESTDIR)$(INCLUDEDIR)
-	install -d $(DESTDIR)$(LIBDIR)
-	install -m 644 gvm_notify.h  $(DESTDIR)$(INCLUDEDIR)/
-	install -m 755 $(TARGET)     $(DESTDIR)$(LIBDIR)/
-	ldconfig 2>/dev/null || true
-
-uninstall:
-	rm -f  $(DESTDIR)$(INCLUDEDIR)/gvm_notify.h
-	rm -f  $(DESTDIR)$(LIBDIR)/libgvmnotify.so
-	ldconfig 2>/dev/null || true
-
-.PHONY: all clean install uninstall
+.PHONY: all install-cxx install-python uninstall-cxx uninstall-python clean
